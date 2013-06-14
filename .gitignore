@@ -1,0 +1,10 @@
+#*#
+*~
+*.class
+
+.svn
+nbproject
+build/
+build.xml
+dist/
+manifest.mf
