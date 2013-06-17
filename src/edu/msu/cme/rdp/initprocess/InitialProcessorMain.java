@@ -64,7 +64,7 @@ public class InitialProcessorMain {
             } else {
                 throw new Exception("seq-file is required");
             }
-            
+
             if(line.hasOption("qual-file")) {
                 options.qualInfile = new File(line.getOptionValue("qual-file")).getAbsolutePath();
             }
@@ -103,7 +103,7 @@ public class InitialProcessorMain {
                 try {
                     options.genename = GENENAME.valueOf(line.getOptionValue("gene-name"));
                 } catch(Exception e) {
-                    throw new Exception("Gene name must be open of RRNA16S, OTHER");
+                    throw new Exception("Gene name must be one of RRNA16S, OTHER");
                 }
             }
 
@@ -145,7 +145,7 @@ public class InitialProcessorMain {
 
         } catch(Exception e) {
             System.err.println("Error: " + e.getMessage());
-            new HelpFormatter().printHelp("awerasdf", cmdOptions);
+            new HelpFormatter().printHelp("USAGE: InitialProcessorMain <options>", cmdOptions);
             return;
         }
 
