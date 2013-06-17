@@ -1,0 +1,6 @@
+RDP's Sequence Filtering pipeline and Sequence Initial Processor
+
+QUICKSTART
+==========
+ant jar
+java -jar dist/SeqFilters.jar
