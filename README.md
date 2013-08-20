@@ -7,7 +7,7 @@ Initial processing requires a sequence file and at least one forward primer. The
 obtained from the pyrosequencing center, and can be in FASTA format or SFF Format (which contains both the sequence and quality information).
 
 <a name="Tutorial"></a>
-The sample input and output files can be downloaded from RDP tutorial http://rdp.cme.msu.edu/tutorials/init\_process/RDPtutorial_INITIAL-PROCESS.html.
+The sample input and output files can be downloaded from RDP tutorial http://rdp.cme.msu.edu/tutorials/init_process/RDPtutorial_INITIAL-PROCESS.html.
 
 ### Setup
 This project depends on ReadSeq, AlignmentTools, and ProbeMatch. See RDPTools (https://github.com/rdpstaff/RDPTools) to install.
