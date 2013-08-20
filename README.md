@@ -6,7 +6,8 @@ and removing sequences of low quality. If the gene chosen is 16S RNA, the orient
 Initial processing requires a sequence file and at least one forward primer. The required sequence file, 
 obtained from the pyrosequencing center, and can be in FASTA format or SFF Format (which contains both the sequence and quality information).
 
-The sample input and output files can be downloaded from RDP tutorial `http://rdp.cme.msu.edu/tutorials/init_process/RDPtutorial_INITIAL-PROCESS.html`.
+<a name="Tutorial"></a>
+The sample input and output files can be downloaded from RDP tutorial http://rdp.cme.msu.edu/tutorials/init\_process/RDPtutorial_INITIAL-PROCESS.html.
 
 ### Setup
 This project depends on ReadSeq, AlignmentTools, and ProbeMatch. See RDPTools (https://github.com/rdpstaff/RDPTools) to install.
@@ -34,7 +35,7 @@ This project depends on ReadSeq, AlignmentTools, and ProbeMatch. See RDPTools (h
  		-t,--tag-file <arg>          Tag file (default=null)
 
  		
- 	An example command using the data from RDP tutorial (link above). 
+ 	An example command using the data from RDP tutorial, [see link above](#Tutorial). 
  	 		
  		java -jar /path/to/SeqFilters.jar --forward-primers AYTGGGYDTAAAGNG --max-forward 2 --reverse-primers CCGTCAATTCMTTTRAGT --max-reverse 1 --seq-file 1.TCA.454Reads.fna --qual-file 1.TCA.454Reads.qual --min-length 300 --tag-file region1_tag.txt --outdir initial_process
 
