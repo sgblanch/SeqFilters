@@ -21,6 +21,7 @@ public class CharReplaceFilter implements SeqFilter {
     private Map<Character, Character> replaceMap;
 
     public static final Map<Character, Character> rnaReplaceMap;
+    public static final Map<Character, Character> dnaReplaceMap;
     static {
         Map<Character, Character> tmpMap = new HashMap();
         tmpMap.put('X', 'N');
@@ -30,6 +31,15 @@ public class CharReplaceFilter implements SeqFilter {
         tmpMap.put('I', 'D');
         tmpMap.put('i', 'd');
         rnaReplaceMap = Collections.unmodifiableMap(tmpMap);
+
+        tmpMap = new HashMap();
+        tmpMap.put('X', 'N');
+        tmpMap.put('x', 'n');
+        tmpMap.put('U', 'T');
+        tmpMap.put('u', 't');
+        tmpMap.put('I', 'D');
+        tmpMap.put('i', 'd');
+        dnaReplaceMap = Collections.unmodifiableMap(tmpMap);
     }
 
     public CharReplaceFilter(Map<Character, Character> replaceMap) {

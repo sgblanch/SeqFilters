@@ -14,6 +14,7 @@ import edu.msu.cme.rdp.seqfilter.SeqFilterResult;
 import edu.msu.cme.rdp.seqfilter.utils.TrimHelper;
 import edu.msu.cme.rdp.seqfilter.utils.TrimHelper.TrimResult;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -36,36 +37,31 @@ public class PrimerFilter implements SeqFilter {
     private boolean keepPrimers = false;
     private PrimerFilterListener listener;
 
-    public PrimerFilter(String[] forwardPrimerStrs, String[] reversePrimerStrs, int maxForwardDist, int maxReverseDist, boolean reversible, boolean keepPrimers) {
+    public PrimerFilter(List<String> forwardPrimerStrs, List<String> reversePrimerStrs, int maxForwardDist, int maxReverseDist, boolean reversible, boolean keepPrimers) {
         this(forwardPrimerStrs, reversePrimerStrs, maxForwardDist, maxReverseDist, reversible, keepPrimers, null);
     }
 
-    public PrimerFilter(String[] forwardPrimerStrs, String[] reversePrimerStrs, int maxForwardDist, int maxReverseDist, boolean reversible, boolean keepPrimers, PrimerFilterListener listener) {
+    public PrimerFilter(List<String> forwardPrimerStrs, List<String> reversePrimerStrs, int maxForwardDist, int maxReverseDist, boolean reversible, boolean keepPrimers, PrimerFilterListener listener) {
         this.maxForwardDist = maxForwardDist;
         this.maxReverseDist = maxReverseDist;
 
         this.keepPrimers = keepPrimers;
         this.reversible = reversible;
 
-        forwardPrimers = new PatternBitMask64[forwardPrimerStrs.length];
-        this.forwardPrimerStrs = Arrays.copyOf(forwardPrimerStrs, forwardPrimerStrs.length);
-        for (int primer = 0; primer < forwardPrimerStrs.length; primer++) {
-            if (forwardPrimerStrs[primer].equals("")) {
-                throw new IllegalArgumentException("Foward primer " + primer + " is empty");
+        if (!forwardPrimerStrs.isEmpty()) {
+            forwardPrimers = new PatternBitMask64[forwardPrimerStrs.size()];
+            this.forwardPrimerStrs = forwardPrimerStrs.toArray(new String[forwardPrimerStrs.size()]);
+            for (int primer = 0; primer < forwardPrimerStrs.size(); primer++) {
+                forwardPrimers[primer] = new PatternBitMask64(forwardPrimerStrs.get(primer), true);
             }
-
-            forwardPrimers[primer] = new PatternBitMask64(forwardPrimerStrs[primer], true);
         }
 
-        if (reversePrimerStrs != null && reversePrimerStrs.length > 0 && (reversePrimerStrs.length > 1 || !reversePrimerStrs[0].equals(""))) {
-            this.reversePrimerStrs = Arrays.copyOf(reversePrimerStrs, reversePrimerStrs.length);
+        if (!reversePrimerStrs.isEmpty()) {
+            this.reversePrimerStrs = reversePrimerStrs.toArray(new String[reversePrimerStrs.size()]);
 
-            this.reversePrimers = new PatternBitMask64[reversePrimerStrs.length];
-            for (int primer = 0; primer < reversePrimerStrs.length; primer++) {
-                if (reversePrimerStrs[primer].equals("")) {
-                    throw new IllegalArgumentException("Reverse primer " + primer + " is empty");
-                }
-                reversePrimers[primer] = new PatternBitMask64(reversePrimerStrs[primer], true);
+            this.reversePrimers = new PatternBitMask64[reversePrimerStrs.size()];
+            for (int primer = 0; primer < reversePrimerStrs.size(); primer++) {
+                reversePrimers[primer] = new PatternBitMask64(reversePrimerStrs.get(primer), true);
             }
         }
 
@@ -107,27 +103,30 @@ public class PrimerFilter implements SeqFilter {
         int reversePrimer = -1;
         int reverseScore = -1;
         int partialMatch = -1;
+        int forwardStop = 0;
         boolean reversed = false;
 
-        TrimResult forwardTrimming = TrimHelper.trimSequence(newSeqString, forwardPrimers);
+        if (forwardPrimers != null) {
+            TrimResult forwardTrimming = TrimHelper.trimSequence(newSeqString, forwardPrimers);
 
-        if (forwardTrimming.getEditDistance() > maxForwardDist) {
-            return new SeqFilterResult("Forward primer didn't hit, best match is with primer " + forwardTrimming.getPrimer() + " with a distance of " + forwardTrimming.getEditDistance());
-        }
-
-        forwardPrimer = forwardTrimming.getPrimer();
-        forwardScore = forwardTrimming.getEditDistance();
-        int forwardStop = forwardTrimming.getPrimerStopIndex();
-
-        if (keepPrimers) {
-            forwardStop = forwardTrimming.getPrimerStopIndex() - forwardPrimerStrs[forwardTrimming.getPrimer() - 1].length();
-            if (forwardStop > 0) {
-                newSeqString = newSeqString.substring(forwardStop);
-            } else {
-                forwardStop = 0;
+            if (forwardTrimming.getEditDistance() > maxForwardDist) {
+                return new SeqFilterResult("Forward primer didn't hit, best match is with primer " + forwardTrimming.getPrimer() + " with a distance of " + forwardTrimming.getEditDistance());
             }
-        } else {
-            newSeqString = forwardTrimming.getTrimmedSeq();
+
+            forwardPrimer = forwardTrimming.getPrimer();
+            forwardScore = forwardTrimming.getEditDistance();
+            forwardStop = forwardTrimming.getPrimerStopIndex();
+
+            if (keepPrimers) {
+                forwardStop = forwardTrimming.getPrimerStopIndex() - forwardPrimerStrs[forwardTrimming.getPrimer() - 1].length();
+                if (forwardStop > 0) {
+                    newSeqString = newSeqString.substring(forwardStop);
+                } else {
+                    forwardStop = 0;
+                }
+            } else {
+                newSeqString = forwardTrimming.getTrimmedSeq();
+            }
         }
 
         if (reversePrimers != null) {
@@ -160,8 +159,8 @@ public class PrimerFilter implements SeqFilter {
                 reverseScore = reverseTrimming.getEditDistance();
 
                 if (keepPrimers) {
-                    if (reverseTrimming.getPrimerStopIndex() - reversePrimerStrs[forwardTrimming.getPrimer() - 1].length() > 0) {
-                        newSeqString = reversePrimerSeq.substring(reverseTrimming.getPrimerStopIndex() - reversePrimerStrs[forwardTrimming.getPrimer() - 1].length());
+                    if (reverseTrimming.getPrimerStopIndex() - reversePrimerStrs[reverseTrimming.getPrimer() - 1].length() > 0) {
+                        newSeqString = reversePrimerSeq.substring(reverseTrimming.getPrimerStopIndex() - reversePrimerStrs[reverseTrimming.getPrimer() - 1].length());
                     } else {
                         newSeqString = reversePrimerSeq;
                     }

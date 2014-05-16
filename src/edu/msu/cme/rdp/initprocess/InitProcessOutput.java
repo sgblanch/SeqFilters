@@ -7,6 +7,9 @@ package edu.msu.cme.rdp.initprocess;
 import edu.msu.cme.rdp.readseq.QSequence;
 import edu.msu.cme.rdp.readseq.writers.FastaWriter;
 import edu.msu.cme.rdp.readseq.readers.Sequence;
+import edu.msu.cme.rdp.readseq.readers.core.FastqCore;
+import edu.msu.cme.rdp.readseq.writers.FastqWriter;
+import edu.msu.cme.rdp.readseq.writers.SequenceWriter;
 import edu.msu.cme.rdp.seqfilter.SeqFilter;
 import edu.msu.cme.rdp.seqfilter.SeqFilterResult;
 import edu.msu.cme.rdp.seqfilter.SeqFilteringResult;
@@ -42,8 +45,8 @@ import org.jfree.ui.RectangleEdge;
  */
 public class InitProcessOutput implements SeqFilterOutput {
 
-    private FastaWriter filteredSeqOut;
-    private FastaWriter qualOut;
+    private FastqWriter fastqWriter;
+    private FastaWriter fastaWriter;
     private int writtenSequences = 0;
     private Map<Integer, Integer> lengthMap = new HashMap();
     private Set<String> seqsMissingQualSeq = new HashSet();
@@ -51,24 +54,17 @@ public class InitProcessOutput implements SeqFilterOutput {
     private Map<Integer, Integer> positionCounts = new HashMap();
     private static final DecimalFormat format = new DecimalFormat("####.##");
 
-    public InitProcessOutput(File seqOutFile) throws IOException {
-        filteredSeqOut = new FastaWriter(seqOutFile);
-    }
-
-    public InitProcessOutput(File seqOutFile, File qualOutFile) throws IOException {
-        filteredSeqOut = new FastaWriter(seqOutFile);
-        qualOut = new FastaWriter(qualOutFile);
+    public InitProcessOutput(File fastqOut, File fastaOut) throws IOException {
+        this.fastaWriter = new FastaWriter(fastaOut);
+        this.fastqWriter = new FastqWriter(fastqOut, FastqCore.Phred33QualFunction);
     }
 
     public void appendSequence(Sequence seq) {
-        filteredSeqOut.writeSeq(seq);
 
-        if (qualOut != null && seq instanceof QSequence) {
-            StringBuilder qualBuf = new StringBuilder();
+        if (seq instanceof QSequence) {
             byte[] qual = ((QSequence) seq).getQuality();
             for (int index = 0; index < qual.length; index++) {
                 byte q = qual[index];
-                qualBuf.append(StringUtils.rightPad(q + "", 3));
 
                 int positionCount = 0;
                 int totalQual = 0;
@@ -79,8 +75,13 @@ public class InitProcessOutput implements SeqFilterOutput {
                 qualityMap.put(index, q + totalQual);
                 positionCounts.put(index, positionCount + 1);
             }
-
-            qualOut.writeSeq(seq.getSeqName(), "length=" + qual.length, qualBuf.toString());
+            try {
+                fastqWriter.writeSeq(seq);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            fastaWriter.writeSeq(seq);
         }
 
         int seqLength = seq.getSeqString().length();
@@ -94,10 +95,8 @@ public class InitProcessOutput implements SeqFilterOutput {
     }
 
     public void close() throws IOException {
-        filteredSeqOut.close();
-        if (qualOut != null) {
-            qualOut.close();
-        }
+        fastaWriter.close();
+        fastqWriter.close();
     }
 
     private void writeLengthStats(File lengthStatsFile, File lengthChartFile, int avgLength, int filteredSeqs) throws IOException {
@@ -130,7 +129,6 @@ public class InitProcessOutput implements SeqFilterOutput {
         XYBarRenderer renderer = (XYBarRenderer) chart.getXYPlot().getRenderer();
         renderer.setShadowVisible(false);
         renderer.setBarPainter(new XYBarPainter() {
-
             public void paintBar(Graphics2D arg0, XYBarRenderer arg1, int arg2, int arg3, RectangularShape arg4, RectangleEdge arg5) {
                 Rectangle r = arg4.getBounds();
                 arg0.setPaint(arg1.getItemPaint(arg2, arg3));
@@ -152,7 +150,7 @@ public class InitProcessOutput implements SeqFilterOutput {
 
         out.println("Position\tAverage Quality");
         for (int position : qualityMap.keySet()) {
-            double avgQual = (double)qualityMap.get(position) / positionCounts.get(position);
+            double avgQual = (double) qualityMap.get(position) / positionCounts.get(position);
             out.println((position + 1) + "\t" + avgQual);
             qualityScatterData.add(position + 1, avgQual);
         }

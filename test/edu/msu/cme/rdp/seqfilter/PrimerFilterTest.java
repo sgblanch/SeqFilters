@@ -8,7 +8,7 @@ package edu.msu.cme.rdp.seqfilter;
 import edu.msu.cme.rdp.readseq.QSequence;
 import edu.msu.cme.rdp.seqfilter.filters.PrimerFilter;
 import edu.msu.cme.rdp.readseq.readers.Sequence;
-import edu.msu.cme.rdp.seqfilter.filters.PrimerFilter.PrimerFilterListener;
+import java.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -61,14 +61,14 @@ public class PrimerFilterTest {
      */
     @Test
     public void testFilterSequence() {
-        PrimerFilter filter = new PrimerFilter(fPrimer, rPrimer, maxEditDist, maxEditDist, true, false);
+        PrimerFilter filter = new PrimerFilter(Arrays.asList(fPrimer), Arrays.asList(rPrimer), maxEditDist, maxEditDist, true, false);
         SeqFilterResult result;
         Sequence testSeq;
 
         testSeq = goodSeq1;
         result = filter.filterSequence(testSeq);
         assertFalse(testSeq.getSeqName() + " failed primer trimming...it shouldn't have! " + result.getErrorMessage(), result.failed());
-        assertEquals(testSeq.getSeqName() + " didn't produce the expected trimming result", result.getResultSeq().getSeqString(), good1Expected); 
+        assertEquals(testSeq.getSeqName() + " didn't produce the expected trimming result", result.getResultSeq().getSeqString(), good1Expected);
         assertEquals("Expected to get a qseq back from goodSeq1", QSequence.class, result.getResultSeq().getClass());
 
         byte[] resultQual = ((QSequence)result.getResultSeq()).getQuality();
@@ -115,8 +115,8 @@ public class PrimerFilterTest {
 
         // change the filter
         int maxRevDist = 0;
-        filter = new PrimerFilter(fPrimer, rPrimer_mod, maxEditDist, maxRevDist, true, true);
-        
+        filter = new PrimerFilter(Arrays.asList(fPrimer), Arrays.asList(rPrimer_mod), maxEditDist, maxRevDist, true, true);
+
         testSeq = parital_badSeq;
         result = filter.filterSequence(testSeq);
         assertTrue(testSeq.getSeqName() + " passed when it shouldn't have", result.failed());

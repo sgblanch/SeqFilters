@@ -11,6 +11,7 @@ import edu.msu.cme.rdp.seqfilter.SeqFilterResult;
 import edu.msu.cme.rdp.seqfilter.filters.PrimerFilter;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
@@ -34,7 +35,7 @@ public class YankPrimers {
 
     public static void yankPrimers(File inFile, File outFile, String[] fowardPrimers, int maxForwardDist, String[] reversePrimers, int maxReverseDist, boolean reversible) throws IOException {
         SequenceReader seqReader = new SequenceReader(inFile);
-        PrimerFilter filter = new PrimerFilter(fowardPrimers, reversePrimers, maxForwardDist, maxReverseDist, reversible, false);
+        PrimerFilter filter = new PrimerFilter(Arrays.asList(fowardPrimers), Arrays.asList(reversePrimers), maxForwardDist, maxReverseDist, reversible, false);
         Sequence seq;
 
         FastaWriter out = new FastaWriter(outFile);

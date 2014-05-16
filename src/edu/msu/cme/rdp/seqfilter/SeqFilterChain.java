@@ -7,6 +7,7 @@ package edu.msu.cme.rdp.seqfilter;
 import edu.msu.cme.rdp.readseq.readers.Sequence;
 import edu.msu.cme.rdp.readseq.SequenceParsingException;
 import edu.msu.cme.rdp.readseq.readers.QSeqReader;
+import edu.msu.cme.rdp.readseq.readers.SeqReader;
 import edu.msu.cme.rdp.readseq.readers.SequenceReader;
 import edu.msu.cme.rdp.seqfilter.output.SeqFilterOutput;
 import java.io.File;
@@ -29,8 +30,7 @@ public class SeqFilterChain {
         this.filters = Arrays.asList(filters);
     }
 
-    public SeqFilteringResult filterSeqs(File inFile, SeqFilterOutput out) throws IOException, SequenceParsingException {
-        SequenceReader seqReader = new SequenceReader(inFile);
+    public SeqFilteringResult filterSeqs(SeqReader reader, SeqFilterOutput out) throws IOException, SequenceParsingException {
 
         Sequence seq;
         Map<SeqFilter, Map<String, SeqFilterResult>> filteredSeqsMap = new LinkedHashMap();
@@ -41,7 +41,7 @@ public class SeqFilterChain {
             filteredSeqsMap.put(filter, new HashMap());
         }
 
-        while ((seq = seqReader.readNextSequence()) != null) {
+        while ((seq = reader.readNextSequence()) != null) {
             SeqFilterResult result = runFilterChain(seq, filteredSeqsMap);
             if (result.failed()) {
                 filteredSeqs++;
@@ -52,9 +52,16 @@ public class SeqFilterChain {
             totalSeqs++;
         }
 
-        seqReader.close();
-
         return new SeqFilteringResult(totalSeqs, filteredSeqs, filteredSeqsMap);
+    }
+
+    public SeqFilteringResult filterSeqs(File inFile, SeqFilterOutput out) throws IOException, SequenceParsingException {
+        SequenceReader seqReader = new SequenceReader(inFile);
+        try {
+            return filterSeqs(seqReader, out);
+        } finally {
+            seqReader.close();
+        }
     }
 
     public SeqFilteringResult filterSeqs(File inFile, File qualityFile, SeqFilterOutput out) throws IOException, SequenceParsingException {
