@@ -97,7 +97,7 @@ public class SeqFilterChain {
         SeqFilterResult result = new SeqFilterResult("No filters specified");
 
         for (SeqFilter filter : filters) {
-            result = filter.filterSequence(seq);
+            result = filter.filterSequence(seq);  
 
             if (result.failed()) {
                 filteredSeqsMap.get(filter).put(seq.getSeqName(), result);
