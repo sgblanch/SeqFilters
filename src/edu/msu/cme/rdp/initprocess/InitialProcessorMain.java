@@ -36,7 +36,7 @@ public class InitialProcessorMain {
         cmdOptions.addOption("s", "seq-file", true, "Sequence file to process");
         cmdOptions.addOption("S", "skip-notag", false, "Don't process no tag sequences");
         cmdOptions.addOption("o", "outdir", true, "Output directory (default=cwd)");
-        cmdOptions.addOption("t", "tag-file", true, "Tag file (default=null)");
+        cmdOptions.addOption("t", "tag-file", true, "tag-file (default=null)");
         cmdOptions.addOption("O", "result-dir-name", true, "Result dir name (default=result_dir)");
         cmdOptions.addOption("p", "keep-primer", true, "Don't trim primers (default=false)");
     }
@@ -80,12 +80,10 @@ public class InitialProcessorMain {
                     throw new Exception("keep-primer must be true/false");
                 }
             }
-
+            
             if(line.hasOption("tag-file")) {
-                tagFile = new File(line.getOptionValue("tag-file"));
-            } else {
-                throw new Exception("tag-file is required");
-            }
+               tagFile = new File(line.getOptionValue("tag-file"));
+            } 
 
             if(line.hasOption("outdir")) {
                 outDir = new File(line.getOptionValue("outdir"));

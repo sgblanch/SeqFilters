@@ -206,8 +206,8 @@ public class InitialProcessor {
                     new ValidAlphabetFilter(ValidAlphabetFilterMode.DROP_SEQUENCE, SeqUtils.RNAAlphabet),
                     new PrimerFilter(options.fPrimer, options.rPrimer, options.forwardMaxEditDist, options.reverseMaxEditDist, options.genename != PipelineGene.OTHER, options.keepPrimers, l),
                     new NSeqFilter(options.noofns),
-                    new SeqLengthFilter(options.minSeqLength, LengthFilterType.GreaterThan),
-                    new SeqLengthFilter(options.maxSeqLength, LengthFilterType.LessThan),
+                    new SeqLengthFilter(options.minSeqLength, LengthFilterType.LessThan),
+                    new SeqLengthFilter(options.maxSeqLength, LengthFilterType.GreaterThan),
                     new ExpQualityFilter(options.minExpQualScore) //new CaseTransformFilter()
                     );
 
