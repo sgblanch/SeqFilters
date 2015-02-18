@@ -136,8 +136,8 @@ public class InitialProcessor {
         out.println("Minimum exponential Q-score: " + params.minExpQualScore);
         out.println("Primers removed?: " + !params.keepPrimers);
         out.println("Process no tag?: " + params.processNoTag);
-        out.println("Forward primer(s): " + Arrays.asList(params.fPrimer).toString().replace("[", "").replace("]", ""));
-        out.println("Max forward primer distance: " + params.forwardMaxEditDist);
+       //out.println("Forward primer(s): " + Arrays.asList(params.fPrimer).toString().replace("[", "").replace("]", ""));
+        //out.println("Max forward primer distance: " + params.forwardMaxEditDist);
 
         if (params.fPrimer == null || params.fPrimer.isEmpty()) {
             out.println("Forward primer(s): (None)");
@@ -206,8 +206,8 @@ public class InitialProcessor {
                     new ValidAlphabetFilter(ValidAlphabetFilterMode.DROP_SEQUENCE, SeqUtils.RNAAlphabet),
                     new PrimerFilter(options.fPrimer, options.rPrimer, options.forwardMaxEditDist, options.reverseMaxEditDist, options.genename != PipelineGene.OTHER, options.keepPrimers, l),
                     new NSeqFilter(options.noofns),
-                    new SeqLengthFilter(options.minSeqLength, LengthFilterType.LessThan),
-                    new SeqLengthFilter(options.maxSeqLength, LengthFilterType.GreaterThan),
+                    new SeqLengthFilter(options.minSeqLength, LengthFilterType.GreaterThan),
+                    new SeqLengthFilter(options.maxSeqLength, LengthFilterType.LessThan),
                     new ExpQualityFilter(options.minExpQualScore) //new CaseTransformFilter()
                     );
 
