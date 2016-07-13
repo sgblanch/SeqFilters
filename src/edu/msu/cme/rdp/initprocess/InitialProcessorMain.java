@@ -36,7 +36,7 @@ public class InitialProcessorMain {
         cmdOptions.addOption("s", "seq-file", true, "Sequence file to process");
         cmdOptions.addOption("S", "skip-notag", false, "Don't process no tag sequences");
         cmdOptions.addOption("o", "outdir", true, "Output directory (default=cwd)");
-        cmdOptions.addOption("t", "tag-file", true, "tag-file (default=null)");
+        cmdOptions.addOption("t", "tag-file", true, "tag-file (default=null, no tag sorting)");
         cmdOptions.addOption("O", "result-dir-name", true, "Result dir name (default=result_dir)");
         cmdOptions.addOption("p", "keep-primer", true, "Don't trim primers (default=false)");
     }
@@ -59,15 +59,13 @@ public class InitialProcessorMain {
         options.keepPrimers = false;
         options.minExpQualScore = 20;
         String resultDirName = "result_dir";
-
+        
         try {
             CommandLine line = new PosixParser().parse(cmdOptions, args);
 
-            if(line.hasOption("seq-file")) {
+            if(line.hasOption("seq-file")) {                
                 options.seqInfile = Arrays.asList(new File(line.getOptionValue("seq-file")));
-            } else {
-                throw new Exception("seq-file is required");
-            }
+            } 
 
             if(line.hasOption("min-qual")) {
                 options.minExpQualScore = Integer.parseInt(line.getOptionValue("min-qual"));
@@ -145,14 +143,40 @@ public class InitialProcessorMain {
                 options.processNoTag = false;
             }
 
+            args = line.getArgs();            
+            if ( args.length == 0){
+                if ( options.seqInfile == null){
+                    throw new Exception("need at least one seqfile");
+                }
+            }else {
+                if (options.seqInfile != null){
+                    throw new Exception("You already set one seq-file. To use multiple input files, please remove -s option");
+                }
+                options.seqInfile = new ArrayList();
+                for ( String f : args){
+                    File afile = new File(f);
+                    if ( !afile.exists()){
+                        throw new Exception("File " + f + " does not exists");
+                    }
+                    options.seqInfile.add(afile);
+                }
+            }
+            if ( options.seqInfile == null){
+                throw new Exception("at least one input file is required. Use -s for one file, or mutiple files after options");
+            }
+            
         } catch(Exception e) {
             System.err.println("Error: " + e.getMessage());
-            new HelpFormatter().printHelp("USAGE: InitialProcessorMain <options>", cmdOptions);
+            new HelpFormatter().printHelp("USAGE: InitialProcessorMain <options> seqfiles ", cmdOptions);
             return;
         }
-
+        
         File resultDir = new File(outDir, resultDirName);
         File tagSortDir = new File(outDir, "tag_sort");
-        InitialProcessor.doInitialProcessing(resultDir, tagSortDir, tagFile, options);
+        if ( tagFile != null){
+            InitialProcessor.doInitialProcessing(resultDir, tagSortDir, tagFile, options);
+        }else {
+            InitialProcessor.doInitialProcessing(resultDir, options);
+        }
     }
 }

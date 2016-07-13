@@ -254,4 +254,30 @@ public class InitialProcessor {
         // create
         runSeqTrim(tagSortedFiles, resultDir, tagSortDir, defaultOptions, customOptsMap);
     }
+    
+    // no tag file, output result use the prefix of the input
+    public static void doInitialProcessing(File resultDir, InitialProcessOptions defaultOptions) throws IOException, SequenceParsingException, BarcodeInvalidException {
+
+        if (!resultDir.exists() && !resultDir.mkdir()) {
+            throw new IOException("Failed to make result dir " + resultDir.getAbsolutePath());
+        }
+
+        List<File> inputFiles = defaultOptions.seqInfile;
+        Map<String, List<File>> tagSortedFiles;
+        Map<String, InitialProcessOptions> customOptsMap;
+        
+        customOptsMap = new HashMap();
+        tagSortedFiles = new HashMap();        
+        for ( File f: inputFiles){
+            String name = f.getName();
+            int index = name.lastIndexOf(".");
+            if ( index != -1){
+                name = name.substring(0, index);
+            }
+            // add one at a time
+            tagSortedFiles.put(name, Arrays.asList(f));
+        }    
+        // create
+        runSeqTrim(tagSortedFiles, resultDir, null, defaultOptions, customOptsMap);
+    }
 }
